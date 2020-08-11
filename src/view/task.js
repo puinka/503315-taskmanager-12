@@ -1,10 +1,25 @@
+const isExpired = (dueDate) => {
+  if (dueDate === null) {
+    return false;
+  }
+
+  let currentDate = new Date();
+  currentDate.setHours(23, 59, 59, 999);
+  currentDate = new Date(currentDate);
+
+  return currentDate.getTime() > dueDate.getTime();
+};
+
+
 export const createTaskTemplate = (task) => {
 
   const {color, description, dueDate} = task;
 
   const date = dueDate !== null ? dueDate.toLocaleString(`en-US`, {day: `numeric`, month: `long`}) : ``;
 
-  return `<article class="card card--${color}">
+  const deadlineClassName = isExpired(dueDate) ? `card--deadline` : ``;
+
+  return `<article class="card card--${color} ${deadlineClassName}">
     <div class="card__form">
       <div class="card__inner">
         <div class="card__control">

@@ -1,6 +1,8 @@
 
 const createFilterItemTemplate = (filter, isChecked) => {
   const {name, count} = filter;
+  const checkedStatus = isChecked ? `checked` : ``;
+  const countStatus = count === 0 ? `disabled` : ``;
 
   return (
     `<input
@@ -8,8 +10,8 @@ const createFilterItemTemplate = (filter, isChecked) => {
       id="filter__${name}"
       class="filter__input visually-hidden"
       name="filter"
-      ${isChecked ? `checked` : ``}
-      ${count === 0 ? `disabled` : ``}
+      ${checkedStatus }
+      ${countStatus}
     />
 
     <label for="filter__${name}" class="filter__label">

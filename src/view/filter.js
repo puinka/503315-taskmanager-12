@@ -10,7 +10,7 @@ const createFilterItemTemplate = (filter, isChecked) => {
       id="filter__${name}"
       class="filter__input visually-hidden"
       name="filter"
-      ${checkedStatus }
+      ${checkedStatus}
       ${countStatus}
     />
 

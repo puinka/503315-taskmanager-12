@@ -28,29 +28,29 @@ const renderTask = (taskListElement, task) => {
 
   const replaceCardToForm = () => {
     taskListElement.replaceChild(taskEditComponent.getElement(), taskComponent.getElement());
+    document.addEventListener(`keydown`, onEscKeyDown);
+
   };
 
   const replaceFormToCard = () => {
     taskListElement.replaceChild(taskComponent.getElement(), taskEditComponent.getElement());
+    document.removeEventListener(`keydown`, onEscKeyDown);
   };
 
   const onEscKeyDown = (evt) => {
     if (evt.key === `Escape` || evt.key === `Esc`) {
       evt.preventDefault();
       replaceFormToCard();
-      document.removeEventListener(`keydown`, onEscKeyDown);
     }
   };
 
   taskComponent.getElement().querySelector(`.card__btn--edit`).addEventListener(`click`, () => {
     replaceCardToForm();
-    document.addEventListener(`keydown`, onEscKeyDown);
   });
 
   taskEditComponent.getElement().querySelector(`form`).addEventListener(`submit`, (evt) => {
     evt.preventDefault();
     replaceFormToCard();
-    document.removeEventListener(`keydown`, onEscKeyDown);
   });
 
   render(taskListElement, taskComponent.getElement(), RenderPosition.BEFOREEND);

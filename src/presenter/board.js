@@ -41,28 +41,28 @@ export default class Board {
 
     const replaceCardToForm = () => {
       replace(taskEditComponent, taskComponent);
+      document.addEventListener(`keydown`, onEscKeyDown);
     };
 
     const replaceFormToCard = () => {
       replace(taskComponent, taskEditComponent);
+      document.removeEventListener(`keydown`, onEscKeyDown);
     };
 
     const onEscKeyDown = (evt) => {
       if (evt.key === `Escape` || evt.key === `Esc`) {
         evt.preventDefault();
         replaceFormToCard();
-        document.removeEventListener(`keydown`, onEscKeyDown);
       }
     };
 
     taskComponent.setEditClickHandler(() => {
       replaceCardToForm();
-      document.addEventListener(`keydown`, onEscKeyDown);
+
     });
 
     taskEditComponent.setFormSubmitHandler(() => {
       replaceFormToCard();
-      document.removeEventListener(`keydown`, onEscKeyDown);
     });
 
     render(this._taskListComponent, taskComponent, RenderPosition.BEFOREEND);

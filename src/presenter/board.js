@@ -2,6 +2,7 @@ import BoardView from "../view/board.js";
 import SortView from "../view/sort.js";
 import TaskListView from "../view/task-list.js";
 import TaskPresenter from "./task.js";
+import {updateItem} from "../utils/common.js";
 import NoTaskView from "../view/no-task.js";
 import LoadMoreButtonView from "../view/load-more-button.js";
 import {render, RenderPosition, remove} from "../utils/render.js";
@@ -22,6 +23,8 @@ export default class Board {
     this._noTaskComponent = new NoTaskView();
     this._loadMoreButtonComponent = new LoadMoreButtonView();
 
+    this._handleTaskChange = this._handleTaskChange.bind(this);
+
     this._handleLoadMoreButtonClick = this._handleLoadMoreButtonClick.bind(this);
   }
 
@@ -33,12 +36,18 @@ export default class Board {
     this._renderBoard();
   }
 
+  _handleTaskChange(updatedTask) {
+    this._boardTasks = updateItem(this._boardTasks, updatedTask);
+    this._sourcedBoardTasks = updateItem(this._sourcedBoardTasks, updatedTask);
+    this._taskPresenter[updatedTask.id].init(updatedTask);
+  }
+
   _renderSort() {
     render(this._boardComponent, this._sortComponent, RenderPosition.AFTERBEGIN);
   }
 
   _renderTask(task) {
-    const taskPresenter = new TaskPresenter(this._taskListComponent);
+    const taskPresenter = new TaskPresenter(this._taskListComponent, this._handleTaskChange);
     taskPresenter.init(task);
     this._taskPresenter[task.id] = taskPresenter;
   }

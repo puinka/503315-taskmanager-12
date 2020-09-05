@@ -43,9 +43,9 @@ export default class Task {
     remove(prevTaskEditComponent);
   }
 
-    destroy() {
-      remove(this._taskComponent);
-      remove(this._taskEditComponent);
+  destroy() {
+    remove(this._taskComponent);
+    remove(this._taskEditComponent);
 
   }
 

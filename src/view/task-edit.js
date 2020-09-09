@@ -121,20 +121,7 @@ const createTaskEditTemplate = (data) => {
         <div class="card__settings">
           <div class="card__details">
             <div class="card__dates">
-              <button class="card__date-deadline-toggle" type="button">
-                date: <span class="card__date-status">yes</span>
-              </button>
-              <fieldset class="card__date-deadline">
-                <label class="card__input-deadline-wrap">
-                  <input
-                    class="card__date"
-                    type="text"
-                    placeholder=""
-                    name="date"
-                    value="23 September"
-                  />
-                </label>
-              </fieldset>
+
               ${dateTemplate}
 
               ${repeatingTemplate}

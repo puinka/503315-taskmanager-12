@@ -1,6 +1,6 @@
 import SmartView from "./smart.js";
 import {COLORS} from "../const.js";
-import {isTaskExpired, isTaskRepeating, humanizeTaskDueDate} from "../utils/task.js";
+import {isTaskRepeating, formatTaskDueDate} from "../utils/task.js";
 
 import flatpickr from "flatpickr";
 
@@ -34,7 +34,7 @@ const createTaskEditDateTemplate = (dueDate, isDueDate) => {
           type="text"
           placeholder=""
           name="date"
-          value="${humanizeTaskDueDate(dueDate)}"
+          value="${formatTaskDueDate(dueDate)}"
         />
       </label>
     </fieldset>` : ``}
@@ -90,9 +90,6 @@ const createTaskEditColorsTemplate = (currentColor) => {
 const createTaskEditTemplate = (data) => {
   const {color, description, dueDate, repeating, isDueDate, isRepeating} = data;
 
-  const deadlineClassName = isTaskExpired(dueDate)
-    ? `card--deadline`
-    : ``;
   const dateTemplate = createTaskEditDateTemplate(dueDate, isDueDate);
 
   const repeatingClassName = isRepeating
@@ -101,11 +98,11 @@ const createTaskEditTemplate = (data) => {
 
   const repeatingTemplate = createTaskEditRepeatingTemplate(repeating, isRepeating);
 
-  const isSubmitDisabled = isRepeating && !isTaskRepeating(repeating);
+  const isSubmitDisabled = (isDueDate && dueDate === null) || (isRepeating && !isTaskRepeating(repeating));
 
   const colorsTemplate = createTaskEditColorsTemplate(color);
 
-  return `<article class="card card--edit card--${color} ${deadlineClassName} ${repeatingClassName}">
+  return `<article class="card card--edit card--${color} ${repeatingClassName}">
     <form class="card__form" method="get">
       <div class="card__inner">
         <div class="card__color-bar">
@@ -163,6 +160,7 @@ export default class TaskEdit extends SmartView {
     this._colorChangeHandler = this._colorChangeHandler.bind(this);
 
     this._setInnerHandlers();
+    this._setDatepicker();
   }
 
   reset(task) {
@@ -250,6 +248,7 @@ export default class TaskEdit extends SmartView {
 
   restoreHandlers() {
     this._setInnerHandlers();
+    this._setDatepicker();
     this.setFormSubmitHandler(this._callback.formSubmit);
   }
 

@@ -155,14 +155,6 @@ export default class Board {
 
   }
 
-  _clearTaskList() {
-    this._taskListComponent.getElement().innerHTML = ``;
-    Object
-      .values(this._taskPresenter)
-      .forEach((presenter) => presenter.destroy());
-    this._taskPresenter = {};
-    this._renderedTaskCount = TASK_COUNT_PER_STEP;
-  }
 
   _clearBoard({resetRenderedTaskCount = false, resetSortType = false} = {}) {
     const taskCount = this._getTasks().length;
@@ -182,17 +174,6 @@ export default class Board {
 
     if (resetSortType) {
       this._currentSortType = SortType.DEFAULT;
-    }
-  }
-
-  _renderTaskList() {
-    const taskCount = this._getTasks().length;
-    const tasks = this._getTasks().slice(0, Math.min(taskCount, TASK_COUNT_PER_STEP));
-
-    this._renderTasks(tasks);
-
-    if (taskCount > TASK_COUNT_PER_STEP) {
-      this._renderLoadMoreButton();
     }
   }
 

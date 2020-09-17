@@ -5,7 +5,8 @@ import TaskPresenter from "./task.js";
 import NoTaskView from "../view/no-task.js";
 import LoadMoreButtonView from "../view/load-more-button.js";
 import {render, RenderPosition, remove} from "../utils/render.js";
-import {UpdateType, UserAction} from "../const.js";
+import {sortTaskUp, sortTaskDown} from "../utils/task.js";
+import {SortType, UpdateType, UserAction} from "../const.js";
 
 const TASK_COUNT_PER_STEP = 8;
 
@@ -14,21 +15,24 @@ export default class Board {
     this._tasksModel = tasksModel;
     this._boardContainer = boardContainer;
     this._renderedTaskCount = TASK_COUNT_PER_STEP;
-    // sort is missiong still
+    this._currentSortType = SortType.DEFAULT;
 
     this._taskPresenter = {};
 
+    this._sortComponent = null;
+    this._loadMoreButtonComponent = null;
+
     this._boardComponent = new BoardView();
-    this._sortComponent = new SortView();
     this._taskListComponent = new TaskListView();
     this._noTaskComponent = new NoTaskView();
-    this._loadMoreButtonComponent = new LoadMoreButtonView();
+
 
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
 
     this._handleLoadMoreButtonClick = this._handleLoadMoreButtonClick.bind(this);
+    this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
 
     this._tasksModel.addObserver(this._handleModelEvent);
   }
@@ -42,12 +46,12 @@ export default class Board {
   }
 
   _getTasks() {
-    // switch (this._currentSortType) {
-    //   case SortType.DATE_UP:
-    //     return this._tasksModel.getTasks().slice().sort(sortTaskUp);
-    //   case SortType.DATE_DOWN:
-    //     return this._tasksModel.getTasks().slice().sort(sortTaskDown);
-    // }
+    switch (this._currentSortType) {
+      case SortType.DATE_UP:
+        return this._tasksModel.getTasks().slice().sort(sortTaskUp);
+      case SortType.DATE_DOWN:
+        return this._tasksModel.getTasks().slice().sort(sortTaskDown);
+    }
 
     return this._tasksModel.getTasks();
   }
@@ -79,8 +83,12 @@ export default class Board {
         this._taskPresenter[data.id].init(data);
         break;
       case UpdateType.MINOR:
+        this._clearBoard();
+        this._renderBoard();
         break;
       case UpdateType.MAJOR:
+        this._clearBoard({resetRenderedTaskCount: true, resetSortType: true});
+        this._renderBoard();
         break;
     }
   }
@@ -91,11 +99,19 @@ export default class Board {
     }
 
     this._currentSortType = sortType;
-    this._clearTaskList();
-    this._renderTaskList();
+    this._clearBoard({resetRenderedTaskCount: true});
+    this._renderBoard();
   }
 
   _renderSort() {
+
+    if (this._sortComponent !== null) {
+      this._sortComponent = null;
+    }
+
+    this._sortComponent = new SortView(this._currentSortType);
+    this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
+
     render(this._boardComponent, this._sortComponent, RenderPosition.AFTERBEGIN);
   }
 
@@ -127,9 +143,16 @@ export default class Board {
   }
 
   _renderLoadMoreButton() {
+
+    if (this._loadMoreButtonComponent !== null) {
+      this._loadMoreButtonComponent = null;
+    }
+
+    this._loadMoreButtonComponent = new LoadMoreButtonView();
+    this._loadMoreButtonComponent.setClickHandler(this._handleLoadMoreButtonClick);
+
     render(this._boardComponent, this._loadMoreButtonComponent, RenderPosition.BEFOREEND);
 
-    this._loadMoreButtonComponent.setClickHandler(this._handleLoadMoreButtonClick);
   }
 
   _clearTaskList() {
@@ -139,6 +162,27 @@ export default class Board {
       .forEach((presenter) => presenter.destroy());
     this._taskPresenter = {};
     this._renderedTaskCount = TASK_COUNT_PER_STEP;
+  }
+
+  _clearBoard({resetRenderedTaskCount = false, resetSortType = false} = {}) {
+    const taskCount = this._getTasks().length;
+
+    Object.values(this._taskPresenter).forEach((presenter) => presenter.destroy());
+    this._taskPresenter = {};
+
+    remove(this._sortComponent);
+    remove(this._noTaskComponent);
+    remove(this._loadMoreButtonComponent);
+
+    if (resetRenderedTaskCount) {
+      this._renderedTaskCount = TASK_COUNT_PER_STEP;
+    } else {
+      this._renderTaksCount = Math.min(taskCount, this._renderedTaskCount);
+    }
+
+    if (resetSortType) {
+      this._currentSortType = SortType.DEFAULT;
+    }
   }
 
   _renderTaskList() {
@@ -154,12 +198,19 @@ export default class Board {
 
 
   _renderBoard() {
-    if (this._getTasks().every((task) => task.isArchive)) {
+    const tasks = this._getTasks();
+    const taskCount = tasks.length;
+
+    if (taskCount === 0) {
       this._renderNoTasks();
       return;
     }
 
     this._renderSort();
-    this._renderTaskList();
+    this._renderTasks(tasks.slice(0, Math.min(taskCount, this._renderedTaskCount)));
+
+    if (taskCount > this._renderedTaskCount) {
+      this._renderLoadMoreButton();
+    }
   }
 }
